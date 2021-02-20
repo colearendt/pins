@@ -23,6 +23,7 @@ board_initialize.rsconnect <- function(board, ...) {
 
   if (!is.null(args$server)) {
     board$server <-  gsub("/$", "", args$server)
+    # TODO: this is "risky"... is it used anywhere? not all server names are so deterministic...
     board$server_name <- gsub("https?://|(:[0-9]+)?/.*", "", args$server)
   }
 
