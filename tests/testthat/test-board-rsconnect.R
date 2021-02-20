@@ -22,6 +22,82 @@ test_that("Mismatched protocols generate correct URL", {
 
   path <- rsconnect_remote_path_from_url(list(server = "http://foo.com/rsc"), "https://foo.com/rsc/foo/bar")
   expect_equal(path, "/foo/bar")
+
+  path <- rsconnect_remote_path_from_url(list(server = "https://foo.com:443/rsc"), "https://foo.com/rsc/foo/bar")
+  expect_equal(path, "/foo/bar")
+
+  path <- rsconnect_remote_path_from_url(list(server = "https://foo.com/rsc"), "https://foo.com:443/rsc/foo/bar")
+  expect_equal(path, "/foo/bar")
+
+
+  path <- rsconnect_remote_path_from_url(list(server = "https://foo.com:8443/rsc"), "https://foo.com:8443/rsc/foo/bar")
+  expect_equal(path, "/foo/bar")
+
+
+  path <- rsconnect_remote_path_from_url(list(server = "https://foo.com:8443/rsc"), "http://foo.com:8443/rsc/foo/bar")
+  expect_equal(path, "/foo/bar")
+})
+
+test_that("rsconnect board with non-hostname server_name and path works", {
+  # order from board_rsconnect_token.R
+  mock_get_function <- mockery::mock(
+    function() {return(data.frame(name = "cole", server = "cole"))}, # accounts
+    function() {return()}, # accountInfo
+    function(name) {return(list(name = name, url = "https://myserver.example.com/rsc/__api__"))}, # serverInfo
+    function() {return()}, # signatureHeaders
+    function() {return()}, # httpFunction
+    function() {return()}, # servers
+    cycle = TRUE
+  )
+
+  with_mock(
+    get_function = mock_get_function,
+    {
+      pins::board_register_rsconnect("rsconnect", "cole", "cole")
+    },
+    .env = "pins"
+  )
+  with_mock(
+    get_function = mock_get_function,
+    {
+      pins::board_register_rsconnect("rsconnect", "https://myserver.example.com/rsc/__api__", "cole")
+    },
+    .env = "pins"
+  )
+
+})
+
+test_that("rsconnect board with hostname server_name and path works", {
+  # order from board_rsconnect_token.R
+  mock_get_function <- mockery::mock(
+    function() {return(data.frame(name = "myserver.example.com", server = "myserver.example.com"))}, # accounts
+    function() {return()}, # accountInfo
+    function(name) {return(list(name = name, url = "https://myserver.example.com/rsc/__api__"))}, # serverInfo
+    function() {return()}, # signatureHeaders
+    function() {return()}, # httpFunction
+    function() {return()}, # servers
+    cycle = TRUE
+  )
+
+  with_mock(
+    get_function = mock_get_function,
+    {
+      pins::board_register_rsconnect("rsconnect", "myserver.example.com", "cole")
+    },
+    .env = "pins"
+  )
+  with_mock(
+    get_function = mock_get_function,
+    {
+      pins::board_register_rsconnect("rsconnect", "https://myserver.example.com/rsc/__api__", "cole")
+    },
+    .env = "pins"
+  )
+
+})
+
+test_that("rsconnect board with path works", {
+  skip("TODO")
 })
 
 # Live API ---------------------------------------------------------------------
